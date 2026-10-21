@@ -15,3 +15,6 @@ assets/fonts/*.woff2
 *.log
 Thumbs.db
 desktop.ini
+
+# private working notes about the owner's PC (kept local)
+MAP.md
