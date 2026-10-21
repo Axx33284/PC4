@@ -13,6 +13,18 @@ npm run fullscreen      # opens straight into Console Mode
 Or double-click `Start PC4.bat` / `Start PC4 (Console Mode).bat`.
 `npm run dist` builds a Windows installer into `dist/`.
 
+## Releasing an update
+
+```
+npm run release                                  # 1.2.0 -> 1.2.1
+npm run release -- minor --notes "What changed"  # 1.2.0 -> 1.3.0, with release notes
+npm run release -- --dry-run                     # show the steps, change nothing
+```
+
+It bumps the version, builds the helper and the installer, commits and tags `vX.Y.Z`, pushes, and publishes the GitHub
+release (installer, blockmap, `latest.yml`). Installed copies of PC4 1.2.0 and later find it and update themselves.
+Needs a clean `main` branch, `gh auth login`, and the `sounds/` folder (it ships inside the installer).
+
 ## Modes
 
 **Desktop Mode** is laid out like Playnite's desktop app: a sidebar (main menu, Library, Statistics, Controller Test), a top panel with search, filter presets, grouping, sorting, Grid / Details / List views, random game, the explorer and filter panels and notifications, and your controller with its battery in the top-right corner. Games get Playnite's completion status, a user score and notes. Keys: F11 Console Mode, F5 update library, F3 edit, Ctrl+Shift+F search everything, Ctrl+R random game.

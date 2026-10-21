@@ -10,7 +10,8 @@
     "build-helper": "node tools/build-helper.js",
     "predist": "node tools/build-helper.js",
     "dist": "electron-builder --win",
-    "pack": "node tools/build-helper.js && electron-builder --win --dir"
+    "pack": "node tools/build-helper.js && electron-builder --win --dir",
+    "release": "node tools/release.js"
   },
   "author": "Ahmad",
   "license": "MIT",
