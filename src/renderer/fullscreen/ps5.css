@@ -90,14 +90,7 @@ body.ui-ps5 .tile-row.intro { animation: p5RowIn .5s .35s cubic-bezier(.37, 0, .
 body.ui-ps5 .tile-row.intro .tile { animation-name: tileIn5; }
 @keyframes p5RowIn { from { scale: .25; opacity: 0; } }
 @keyframes tileIn5 { from { opacity: 0; translate: 6rem 0; } }
-/* the focused icon: a quick sine-eased grow (PS5-ish: .625 -> 1 in 0.1 s) and a soft white shimmer every 9 s */
-body.ui-ps5 .tile-row .tile.sel { transition-duration: .14s; transition-timing-function: cubic-bezier(.37, 0, .63, 1); }
-body.ui-ps5 .tile-row .tile.sel .art::after {
-  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: #fff; opacity: 0;
-  animation: p5Shimmer 9s 1s infinite;
-}
-@keyframes p5Shimmer { 0% { opacity: 0; animation-timing-function: cubic-bezier(.7, 0, .3, 1); } 16.6% { opacity: .2; animation-timing-function: cubic-bezier(.7, 0, .3, 1); } 33.3%, 100% { opacity: 0; } }
-body.perf-light.ui-ps5 .tile-row .tile.sel .art::after { display: none; }
+
 /* system tiles: dark rounded squares with a white glyph (the Store keeps its blue) */
 body.ui-ps5 .art-sys, body.ui-ps5 .art-sys.app-media, body.ui-ps5 .art-sys.app-gallery { background: rgba(20, 30, 46, .82); }
 body.ui-ps5 .tile-row .tile.sel .art-sys { background: transparent; }
@@ -313,3 +306,156 @@ body.ui-ps5 .login .user .nm { margin-top: 2.4rem; }
 
 /* Light performance mode: no glass */
 body.ui-ps5.perf-light .card { backdrop-filter: none; background: rgba(34, 36, 44, .92); }
+
+/* =====================================================================================================================
+   PS5-ish (Playnite fullscreen theme by David Griggs), rebuilt from its XAML and screenshots of it running on the
+   owner's PC. Loaded last, so it wins over the rules above. Pixel sizes from the 1080p captures: 1rem = 10 px.
+   ===================================================================================================================== */
+@property --p5a { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
+@property --p5f { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+body.ui-ps5 { --font: 'PC4 Custom', 'Segoe UI', 'Segoe UI Variable Display', sans-serif; font-family: var(--font); font-weight: 300; }
+
+/* background: the game's art darkened 15 % under PS5-ish's radial shade (MainBackgroundOverlay); no blur */
+body.ui-ps5 #bg .bg-game::after {
+  background:
+    radial-gradient(ellipse 60% 60% at 90% 40%, transparent 0%, rgba(0,0,0,.25) 50%, rgba(0,0,0,.4) 100%),
+    linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.15));
+}
+
+/* the focus frame of PS5-ish (AnimatedBorderBrush / AnimatedCoverBrush): a 3 px ring 6 px outside the item, a
+   gradient dark -> mauve -> beige that turns once every 4 s; it fades in over 0.3 s after 0.1 s */
+@keyframes p5spin { to { --p5a: 360deg; } }
+@keyframes p5ringIn { from { opacity: 0; inset: 0; } }
+body.ui-ps5 .p5ring::after,
+body.ui-ps5 #home.area-row .tile-row .tile.sel::after,
+body.ui-ps5 .p5-play.focus-ring::after, body.ui-ps5 .p5-more.focus-ring::after,
+body.ui-ps5 .card.focus-ring::after, body.ui-ps5 .wn-entry.focus-ring::after,
+body.ui-ps5 .opt-item.focus-ring::after, body.ui-ps5 .dlg .btn.sel::after, body.ui-ps5 .lib-item.sel .sq::after {
+  content: ''; display: block; position: absolute; inset: -.6rem; z-index: 5; pointer-events: none;
+  width: auto; height: auto; transform: none; border-radius: calc(var(--p5r, 1.4rem) + .6rem); padding: .3rem;
+  background: linear-gradient(var(--p5a), rgba(42, 48, 57, .5) 0%, #a2899d 80%, #dbbda1 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
+  animation: p5spin 4s linear infinite, p5ringIn .3s .1s cubic-bezier(.37, 0, .63, 1) both;
+}
+body.ui-ps5 .card.focus-ring, body.ui-ps5 .wn-entry.focus-ring, body.ui-ps5 .p5-play.focus-ring, body.ui-ps5 .p5-more.focus-ring,
+body.ui-ps5 .opt-item.focus-ring { box-shadow: none; }
+body.ui-ps5.perf-light .p5ring::after, body.ui-ps5.perf-light #home.area-row .tile-row .tile.sel::after { animation: p5ringIn .3s both; }
+
+/* ---------------- top bar: All / Favorites / Media on the left; Search, Settings, avatar, clock on the right ---------------- */
+body.ui-ps5 .p5-tabs { left: 9rem; top: 3.5rem; height: 6rem; gap: 8rem; font-size: 3.4rem; font-weight: 300; }
+body.ui-ps5 .p5-tabs span { color: rgba(255,255,255,.72); font-weight: 300; }
+body.ui-ps5 .p5-tabs span.on { color: #fff; font-weight: 300; }
+body.ui-ps5 #statusbar { right: 5rem; top: 3.2rem; }
+body.ui-ps5 #statusbar .clock { font-size: 4rem; font-weight: 300; }
+body.ui-ps5 .fn-row { top: 3.5rem; gap: 5.5rem; right: calc(var(--sbw, 12rem) + 5rem + 4.4rem); }
+body.ui-ps5 .fn-item { position: relative; width: 6rem; height: 6rem; overflow: visible; }
+body.ui-ps5 .fn-item .ico { width: 3.6rem; height: 3.6rem; stroke-width: 2.6; }
+body.ui-ps5 .fn-item .p5-avatar { width: 4.6rem; height: 4.6rem; border-radius: 1.1rem; }
+body.ui-ps5 .fn-item .p5-avatar img { border-radius: 1.1rem; }
+body.ui-ps5 .fn-item .p5-avatar i { width: 1.2rem; height: 1.2rem; right: -.4rem; bottom: -.4rem; background: #1a8cff; box-shadow: none; }
+body.ui-ps5 #home.area-fn .fn-item.sel { background: #fff; color: #111; box-shadow: 0 0 0 .3rem rgba(0,0,0,.35); }
+body.ui-ps5 #home.area-fn .fn-item.sel .p5-avatar { box-shadow: 0 0 0 .3rem #fff; }
+body.ui-ps5 #home.area-fn .fn-item.fn-avatar.sel { background: transparent; }
+body.ui-ps5 .fn-item.focus-ring::before { display: none; }
+body.ui-ps5 .fn-cap { position: absolute; left: 50%; top: 6.8rem; transform: translateX(-50%); font-size: 2.2rem; color: #fff; white-space: nowrap; opacity: 0; }
+body.ui-ps5 #home.area-fn .fn-item.sel .fn-cap { opacity: 1; }
+body.ui-ps5 .fn-label { display: none; }
+body.ui-ps5 #home.area-fn .tile-row { opacity: 1; }
+
+/* ---------------- the row: portrait covers, the focused one large ---------------- */
+body.ui-ps5 .tile-row .tile {
+  --p5r: 1.2rem; top: 12.6rem; width: 10.4rem; height: 14.2rem; border-radius: var(--p5r); overflow: visible; background: transparent; box-shadow: none;
+  transition: transform .2s cubic-bezier(.37, 0, .63, 1), width .1s cubic-bezier(.37, 0, .63, 1), height .1s cubic-bezier(.37, 0, .63, 1), top .1s cubic-bezier(.37, 0, .63, 1), opacity .3s ease;
+}
+body.ui-ps5 .tile-row .tile .art { border-radius: var(--p5r); background: #1b1d22; box-shadow: 0 .4rem 1.4rem rgba(0,0,0,.35); }
+body.ui-ps5 .tile-row .tile.sel {
+  --p5r: 1.6rem; top: 12.2rem; width: 17.6rem; height: 23.6rem; background: transparent; box-shadow: none;
+}
+body.ui-ps5 .tile-row .tile.sel .art { inset: 0; border-radius: var(--p5r); }
+body.ui-ps5 .tile-row .tile.sel::after { display: block; }
+body.ui-ps5 #home:not(.area-row) .tile-row .tile.sel::after { display: none; }
+body.ui-ps5 .art-cover5 { object-position: center top; }
+body.ui-ps5 .art-ph5 { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; padding: 1rem;
+  background: linear-gradient(#3a3a3a, #232323); color: rgba(255,255,255,.7); text-align: center; font-size: 1.6rem; line-height: 1.2; overflow: hidden; }
+body.ui-ps5 .art-ph5 .ico { width: 4rem; height: 4rem; }
+body.ui-ps5 .tile.sel .art-ph5 span { display: none; }
+/* PS5-ish's cover flash (AnimatedFlashCover): a 25 % white veil sweeps across the focused cover in 0.6 s, fades in
+   0.3 s, every 4.5 s */
+@keyframes p5flash { 0% { --p5f: 0%; opacity: 1; } 13.3% { --p5f: 100%; opacity: 1; } 20%, 100% { --p5f: 100%; opacity: 0; } }
+body.ui-ps5 #home.area-row .tile-row .tile.sel .art::before {
+  content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+  background: linear-gradient(135deg, transparent var(--p5f), rgba(255,255,255,.25) var(--p5f));
+  animation: p5flash 4.5s .4s linear infinite; opacity: 0;
+}
+body.ui-ps5.perf-light #home.area-row .tile-row .tile.sel .art::before { display: none; }
+/* the Store: just PS5-ish's blue bag; More Games: a dark square with its icon */
+body.ui-ps5 .tile-row .tile.k-store .art, body.ui-ps5 .tile-row .tile.k-store.sel .art { background: transparent; box-shadow: none; }
+body.ui-ps5 .art-img5 { position: absolute; inset: 0; display: grid; place-items: center; }
+body.ui-ps5 .art-img5 img { width: 42%; height: auto; }
+body.ui-ps5 .tile.k-store:not(.sel) .art-img5 img { width: 4.2rem; }
+body.ui-ps5 .tile-row .tile.k-more:not(.sel) { height: 10.4rem; }
+body.ui-ps5 .tile-row .tile.k-more .art { background: #1c1d22; }
+body.ui-ps5 .tile-row .tile.k-store.sel, body.ui-ps5 .tile-row .tile.k-more.sel { height: 17.6rem; }
+body.ui-ps5 .tile-row .tile.k-store.sel .art { background: rgba(255,255,255,.08); }
+body.ui-ps5 .tile .run-dot { right: .8rem; top: .8rem; }
+
+/* the name under the small covers, beside the focused one */
+body.ui-ps5 .tile-title, body.ui-ps5 .tile-title.small { top: 28.6rem; font-size: 3.2rem; font-weight: 300; line-height: 1.2; text-shadow: 0 .2rem .8rem rgba(0,0,0,.45); }
+
+/* ---------------- a game: Play Game + ··· bottom-left, Time Played / Last Played bottom-right ---------------- */
+body.ui-ps5 .p5-hero.p5-game { position: relative; height: 51rem; padding: 0; display: block; }
+body.ui-ps5 .p5-game .p5-actions { position: absolute; left: 18rem; top: 43.6rem; margin: 0; gap: 3.1rem; }
+body.ui-ps5 .p5-play {
+  --p5r: 3.5rem; width: 32.2rem; height: 7rem; border-radius: 3.5rem; background: rgba(62, 62, 66, .78); color: #fff;
+  font-size: 3rem; font-weight: 600; transform: none;
+}
+body.ui-ps5 .p5-more { --p5r: 3.5rem; width: 7rem; height: 7rem; background: rgba(62, 62, 66, .78); color: #fff; transform: none; }
+body.ui-ps5 .p5-play.sel { background: #ececec; color: #2a2a2a; transform: none; }
+body.ui-ps5 .p5-more.sel { background: #ececec; color: #2a2a2a; transform: none; }
+body.ui-ps5 .p5-stats {
+  position: absolute; left: 138rem; top: 36.5rem; width: 36.5rem; height: 14.3rem; padding: 1.6rem 2rem; overflow: hidden;
+  display: grid; grid-template-columns: auto 1fr; column-gap: 3.2rem; align-content: start;
+  background: linear-gradient(115deg, rgba(20, 30, 48, .96) 0%, rgba(19, 46, 82, .94) 55%, rgba(28, 82, 140, .92) 100%);
+  box-shadow: 0 .6rem 2rem rgba(0,0,0,.35);
+}
+body.ui-ps5 .p5-st span { display: block; font-size: 2.2rem; font-weight: 300; color: rgba(255,255,255,.88); }
+body.ui-ps5 .p5-st b { display: block; font-size: 2.4rem; font-weight: 600; margin-top: .2rem; white-space: nowrap; }
+body.ui-ps5 .p5-tro { grid-column: 1 / -1; display: flex; gap: 3.6rem; margin-top: 1.4rem; font-size: 2.6rem; font-weight: 300; }
+body.ui-ps5 .p5-tro span { display: inline-flex; align-items: center; gap: 1rem; white-space: nowrap; max-width: 14rem; overflow: hidden; }
+body.ui-ps5 .p5-tro img { width: 3rem; height: 3.6rem; object-fit: contain; }
+body.ui-ps5 #home.area-hub .p5-stats, body.ui-ps5 #home.area-row .p5-stats { opacity: 1; }
+/* the cards under it: PS5-ish dark panels */
+body.ui-ps5 .card { --p5r: .3rem; border-radius: .3rem; background: linear-gradient(135deg, rgba(9, 12, 19, .9), rgba(24, 26, 30, .9)); backdrop-filter: none; }
+body.ui-ps5 .card.sel { transform: none; }
+body.ui-ps5 .wn-entry { --p5r: .3rem; }
+body.ui-ps5 .hub-cards, body.ui-ps5 .hub-cards.p5-cards { padding-left: 18rem; }
+
+/* ---------------- the game menu (···) and other option lists: PS5-ish's panel down the right side ---------------- */
+body.ui-ps5 .opt-panel {
+  top: 0; bottom: 0; right: 0; width: 44rem; border-radius: 0; padding: 0 0 3rem;
+  background: linear-gradient(225deg, #090c13 0%, #181a1e 90%); box-shadow: -1rem 0 4rem rgba(0,0,0,.5);
+}
+body.ui-ps5 .opt-title { padding: 4rem 3rem 2.4rem; margin-bottom: 1.6rem; font-size: 2.6rem; font-weight: 600; color: #fff; white-space: normal;
+  background: linear-gradient(225deg, #090c13 0%, #181a1e 90%); border-bottom: .1rem solid rgba(255,255,255,.06); }
+body.ui-ps5 .opt-item { --p5r: .2rem; position: relative; height: 6rem; margin: 0 1.6rem .4rem; padding: 0 2rem; border-radius: .2rem; font-size: 2.4rem; font-weight: 300; overflow: visible; }
+body.ui-ps5 .opt-item .ico { width: 2.6rem; height: 2.6rem; }
+body.ui-ps5 .opt-item.sel { background: rgba(255,255,255,.07); }
+/* AnimatedFlashMenu: a quick white flash when an item gets the focus */
+@keyframes p5menuflash { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+body.ui-ps5 .opt-item.sel::before { content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none; box-shadow: none;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.25)); animation: p5menuflash .6s both; display: block; }
+
+/* ---------------- dialogs (MessageBox): dark gradient panel, white pill buttons ---------------- */
+body.ui-ps5 .dlg { border-radius: .3rem; background: linear-gradient(225deg, #0c1220 0%, #16181c 85%); box-shadow: 0 1rem 5rem rgba(0,0,0,.6); }
+body.ui-ps5 .dlg .btn { --p5r: 3.2rem; position: relative; border-radius: 3.2rem; overflow: visible; background: rgba(255,255,255,.1); font-weight: 300; }
+body.ui-ps5 .dlg .btn.sel { background: #e8e8e8; color: #333; font-weight: 400; }
+
+/* the library grid ("More Games") */
+body.ui-ps5 .lib-item .sq { position: relative; overflow: visible; }
+body.ui-ps5 .lib-item.sel .sq { box-shadow: none; transform: none; }
+
+/* the cards wait below the screen until you go down to them (PS5-ish shows only Play Game and the stats card) */
+body.ui-ps5 .p5-game + .p5-cards { margin-top: 15rem; }
+body.ui-ps5 .tile.k-store:not(.sel) .art-img5 img { width: 7rem; }
+body.ui-ps5 .art-img5.more5 img { width: 72%; }
+body.ui-ps5 .tile.k-store.sel .art-img5 img { width: 60%; }

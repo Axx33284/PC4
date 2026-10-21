@@ -35,15 +35,19 @@ const FN = [
   { id: 'power', icon: 'power', label: 'Power' },
 ];
 
-// PS5 style: small rounded icons along the top, the focused one big with its name under the icons beside it,
-// the game's art filling the screen with its logo + Play, and cards along the bottom
-// (sizes measured on a real PS5 home screen: 1rem = 1/108 of the screen height)
+// PS5 style, rebuilt after Playnite's "PS5-ish" fullscreen theme (David Griggs), measured on the owner's 1080p screen
+// with it running (1rem = 1/108 of the screen height = 10 px there): tabs All / Favorites (+ Media), the Store icon on
+// the left, portrait covers 104x142 px with 11 px gaps, the focused one 176x240 px at x 167 with a rotating gradient
+// ring, its name under the small covers beside it, a More Games tile at the end, the game's art filling the screen,
+// "Play Game" + "···" bottom-left and a Time Played / Last Played card bottom-right.
 const ps5 = () => ctx.settings.uiStyle === 'ps5';
-const P5 = { T: 11.4, G: 0.7, SEL: 19, X: 16.5, GAP: 1.2 };
+const P5 = { W: 10.4, G: 1.1, SEL: 17.6, X: 16.7, GAP: 1.7 };
+const TABS5 = ['all', 'favorites', 'media'];
+const P5_IMG = name => new URL(`../../../assets/ps5/${name}`, import.meta.url).href;
 // the PS5's top-right corner: Search, Settings, your avatar (the clock is the status bar)
 const FN5 = [
-  { id: 'search', icon: 'search', label: 'Search' },
-  { id: 'settings', icon: 'gear', label: 'Settings' },
+  { id: 'search', icon: 'searchBold', label: 'Search' },
+  { id: 'settings', icon: 'gearFill', label: 'Settings' },
   { id: 'account', icon: 'user', label: 'Profile' },
 ];
 // the words above the cards of the PS5's non-game hubs
@@ -64,10 +68,10 @@ export class Home {
   constructor(root, nav) {
     this.nav = nav;
     this.root = el(`<div id="home" class="screen area-row"><div class="home-scroller">
-      <div class="p5-tabs"><span data-tab="games">Games</span><span data-tab="media">Media</span></div>
+      <div class="p5-tabs"><span data-tab="all">All</span><span data-tab="favorites">Favorites</span><span data-tab="media">Media</span></div>
       <div class="fn-row"></div><div class="fn-label"></div>
       <div class="tile-row"></div><div class="tile-title"></div><div class="hub"></div></div></div>`);
-    this.tab = 'games';
+    this.tab = 'all';
     this.root.querySelector('.p5-tabs').addEventListener('click', e => { const t = e.target.closest('[data-tab]'); if (t) this.setTab(t.dataset.tab); });
     root.appendChild(this.root);
     this.scroller = this.root.querySelector('.home-scroller');
@@ -125,26 +129,29 @@ export class Home {
     const store = on('showStore') ? [{ key: 'store', kind: 'store' }] : [];
     // like the PS4: the Library is always the last tile, at the far right of the row
     if (!ps5()) return [{ key: 'import', kind: 'import' }, { key: 'whatsnew', kind: 'whatsnew' }, ...recent, ...store, ...apps, { key: 'library', kind: 'library' }];
-    // PS5: games on the Games tab (the Store first, Game Library last), TV & video apps on the Media tab
-    if (this.tab === 'media') return apps.length ? apps : [{ key: 'media', kind: 'media' }];
-    return [...store, { key: 'whatsnew', kind: 'whatsnew' }, ...recent, { key: 'import', kind: 'import' }, { key: 'library', kind: 'library' }];
+    // PS5 (PS5-ish): the Store icon first, the games most recent first (Favorites: only those), More Games last;
+    // Explore, the TV & video apps and Game Import on the Media tab
+    if (this.tab === 'media') return [{ key: 'whatsnew', kind: 'whatsnew' }, ...apps, { key: 'import', kind: 'import' }];
+    const list = this.tab === 'favorites' ? recent.filter(x => x.kind === 'game' && x.g.favorite) : recent;
+    return [...store, ...list, { key: 'library', kind: 'library' }];
   }
 
   // where PS / Home lands: PS4 the first item after Game Import, PS5 the most recent game
   homeIndex() {
     if (!ps5()) return 1;
+    if (this.tab === 'media') return 0;
     const i = this.items.findIndex(it => it.kind === 'game' || it.kind === 'folder');
     return i >= 0 ? i : 0;
   }
 
   setTab(tab) {
-    if (!ps5() || tab === this.tab) return;
+    if (!ps5() || tab === this.tab || !TABS5.includes(tab)) return;
     sfx('move');
     this.tab = tab;
     this.items = [];
     this.sel = 0;
     this.refresh();
-    this.sel = tab === 'games' ? this.homeIndex() : 0;
+    this.sel = this.homeIndex();
     this.setArea('row');
     this.layout();
     this.renderHub(true);
@@ -153,7 +160,7 @@ export class Home {
   // the console style changed (Settings > Themes > Console Style)
   restyle() {
     this.fnSel = ps5() ? 0 : 3;
-    this.tab = 'games';
+    this.tab = 'all';
     this.items = [];
     this.area = 'row';
     this.refresh();
@@ -164,6 +171,16 @@ export class Home {
   }
 
   artFor(it) {
+    if (ps5()) {
+      // PS5-ish: portrait covers; its own Store and More Games pictures
+      if (it.kind === 'game') {
+        const c = media(it.g, 'coverThumb') || media(it.g, 'cover');
+        if (c) return `<img class="art-img art-cover5" src="${c}" decoding="async" style="${adjustStyle((it.g.artAdjust || {}).cover)}">`;
+        return `<div class="art-ph5">${icon('gamepad')}<span>${esc(it.g.name)}</span></div>`;
+      }
+      if (it.kind === 'store') return `<div class="art-img5 store5"><img src="${P5_IMG('store.png')}" alt=""></div>`;
+      if (it.kind === 'library') return `<div class="art-img5 more5"><img src="${P5_IMG('more-games.png')}" alt=""></div>`;
+    }
     if (it.kind === 'game') return gameArt(it.g);
     if (it.kind === 'folder') return folderArt(it.f);
     if (it.kind === 'import') return sysArt('bag', 'Game Import', 'store');
@@ -183,7 +200,7 @@ export class Home {
   }
 
   titleFor(it) {
-    return { game: it.g && it.g.name, folder: it.f && it.f.name, import: 'Game Import', whatsnew: ps5() ? 'Explore' : "What's New", library: 'Library', youtube: 'YouTube', store: 'Game Store', media: 'Media Player', gallery: 'Capture Gallery' }[it.kind];
+    return { game: it.g && it.g.name, folder: it.f && it.f.name, import: 'Game Import', whatsnew: ps5() ? 'Explore' : "What's New", library: ps5() ? 'More Games' : 'Library', youtube: 'YouTube', store: 'Game Store', media: 'Media Player', gallery: 'Capture Gallery' }[it.kind];
   }
 
   refresh() {
@@ -246,7 +263,7 @@ export class Home {
   }
 
   layout5() {
-    const { T, G, SEL, X, GAP } = P5;
+    const { W, G, SEL, X, GAP } = P5;
     const sel = this.sel;
     const it = this.items[sel];
     const name = it ? this.titleFor(it) || '' : '';
@@ -257,14 +274,16 @@ export class Home {
     this.items.forEach((item, i) => {
       const e = this.tileEls.get(item.key);
       let x;
-      if (i < sel) x = X - GAP - T - (sel - i - 1) * (T + G);
+      if (i < sel) x = X - GAP - W - (sel - i - 1) * (W + G);
       else if (i === sel) x = X;
-      else x = X + SEL + GAP + (i - sel - 1) * (T + G);
+      else x = X + SEL + GAP + (i - sel - 1) * (W + G);
       e.style.transform = `translate3d(${x}rem,0,0)`;
       e.classList.toggle('sel', i === sel);
-      e.classList.toggle('gone', i < sel - 1); // one icon stays in view on the left, like the PS5
-      e.style.visibility = x < -40 || x > vw + 20 ? 'hidden' : '';
-      if (this.intro) e.style.animationDelay = `${Math.max(0, i - sel) * 40}ms`;
+      e.classList.remove('gone');
+      e.classList.toggle('k-store', item.kind === 'store');
+      e.classList.toggle('k-more', item.kind === 'library');
+      e.style.visibility = x < -30 || x > vw + 20 ? 'hidden' : '';
+      if (this.intro) e.style.animationDelay = `${200 + Math.max(0, i - sel) * 100}ms`; // PS5-ish: one after another, 0.1 s apart
     });
   }
 
@@ -387,7 +406,7 @@ export class Home {
     }
     if (this.hub.kind === 'folder') this.layoutFolder();
     // PS5: the cards under Play come up into view; other hubs already sit in the middle of the screen
-    const shift = !ps5() ? this.hub.shift : this.hub.grid5 ? (this.hubSel >= 2 ? 34 : 0) : this.hub.kind === 'folder' ? 0 : 34;
+    const shift = !ps5() ? this.hub.shift : this.hub.grid5 ? (this.hubSel >= 2 ? 48 : 0) : this.hub.kind === 'folder' ? 0 : 34;
     if (this.hub.hero5) {
       const h = this.hubEl.querySelector('.p5-hero');
       const html = this.hub.hero5(focusing ? this.hubSel : 0);
@@ -399,6 +418,7 @@ export class Home {
   }
 
   hubFor(it) {
+    if (ps5() && it.kind === 'library') return null; // PS5-ish: More Games just opens the grid of all games
     const h = this.hubFor4(it);
     if (!ps5() || !h || !TEXT5[it.kind]) return h;
     const [kicker, title, desc] = TEXT5[it.kind];
@@ -430,7 +450,7 @@ export class Home {
     const cards = [];
     const add = (html, run) => cards.push({ html: html.replace('data-h="#"', `data-h="${cards.length}"`), run });
     if (ps5()) {
-      add(`<div class="p5-play" data-h="#">${running ? 'Running' : 'Play'}</div>`, () => launchGame(g, this.hubEl.querySelector('.p5-play')));
+      add(`<div class="p5-play" data-h="#">${running ? 'Running' : 'Play Game'}</div>`, () => launchGame(g, this.hubEl.querySelector('.p5-play')));
       add(`<div class="p5-more" data-h="#">${icon('dots')}</div>`, () => gameOptions(g));
     } else add(`<div class="card card-start" data-h="#">${hero ? `<img class="bg" src="${hero}" style="${media(g, 'hero') ? adjustStyle((g.artAdjust || {}).hero) : ''}">` : ''}${logo ? `<img class="logo" src="${logo}">` : `<div class="start-name">${esc(g.name)}</div>`}
       <div class="start-label">${icon('playFill')}${running ? 'Running' : 'Start'}</div></div>`, () => launchGame(g, this.hubEl.querySelector('[data-h="0"]')));
@@ -467,11 +487,17 @@ export class Home {
     add(`<div class="card card-action" data-h="#"><div class="card-pad">${icon('edit', 'big')}<div><h3>Edit Game Details</h3><p>Rename it, change its artwork, wallpaper or theme song.</p></div></div></div>`, () => editGame(g.id));
     add(`<div class="card card-action" data-h="#"><div class="card-pad">${icon('link', 'big')}<div><h3>Link Artwork</h3><p>Pick the matching game to get its cover, wallpaper and logo.</p></div></div></div>`, () => linkArtwork(g));
     if (ps5()) {
-      const sub = [g.playtime >= 60 ? `${fmtPlaytime(g.playtime)} played` : '', g.lastPlayed ? `Last played ${timeAgo(g.lastPlayed)}` : ''].filter(Boolean).join('  ·  ');
+      // PS5-ish's card in the bottom-right corner: Time Played / Last Played over a row of three small counts with its
+      // trophy pictures (PC4 has no trophies: beaten/completed, times played, the library)
+      const done = ['Beaten', 'Completed'].includes(g.completion);
+      const played = g.playtime >= 60 ? fmtPlaytime(g.playtime) : g.playtime ? 'Under a minute' : 'Never';
+      const stats = `<div class="p5-stats"><div class="p5-st"><span>Time Played</span><b>${esc(played)}</b></div>
+        <div class="p5-st"><span>Last Played</span><b>${esc(g.lastPlayed ? new Date(g.lastPlayed).toLocaleDateString() : 'Never')}</b></div>
+        <div class="p5-tro"><span title="Beaten"><img src="${P5_IMG('trophy-gold.png')}" alt="">${done ? 1 : 0}</span><span title="Times played"><img src="${P5_IMG('trophy-silver.png')}" alt="">${g.playCount || 0}</span><span title="Library"><img src="${P5_IMG('trophy-bronze.png')}" alt="">${esc(SOURCES[g.source] || 'PC')}</span></div></div>`;
       return {
         kind: 'cards', grid5: true, count: cards.length, shift: 0,
-        html: `<div class="p5-hero">${logo ? `<img class="p5-logo" src="${logo}">` : `<div class="p5-name">${esc(g.name)}</div>`}
-          <div class="p5-actions">${cards[0].html}${cards[1].html}${sub ? `<span class="p5-sub">${esc(sub)}</span>` : ''}</div></div>
+        html: `<div class="p5-hero p5-game">
+          <div class="p5-actions">${cards[0].html}${cards[1].html}</div>${stats}</div>
           <div class="hub-cards p5-cards">${cards.slice(2).map(c => c.html).join('')}</div>`,
         activate: i => cards[i] && cards[i].run(),
         options: () => gameOptions(g),
@@ -713,7 +739,8 @@ export class Home {
     this.fnSel = Math.min(this.fnSel, list.length - 1);
     const av = ps5() ? avatarUrl(ctx.state) : null;
     const face = f => f.id === 'account' ? `<span class="p5-avatar">${av ? `<img src="${av}" alt="">` : esc((ctx.settings.profileName || 'P')[0].toUpperCase())}<i></i></span>` : icon(f.icon);
-    this.fnRow.innerHTML = list.map((f, i) => `<div class="fn-item ${f.id === 'account' ? 'fn-avatar' : ''} ${i === this.fnSel ? 'sel focus-ring' : ''}" data-i="${i}">${face(f)}</div>`).join('');
+    // PS5-ish: the focused icon's name sits under it
+    this.fnRow.innerHTML = list.map((f, i) => `<div class="fn-item ${f.id === 'account' ? 'fn-avatar' : ''} ${i === this.fnSel ? 'sel focus-ring' : ''}" data-i="${i}">${face(f)}${ps5() ? `<span class="fn-cap">${esc(f.label)}</span>` : ''}</div>`).join('');
     const f = list[this.fnSel];
     this.fnLabel.innerHTML = `${esc(f.label)}${f.sub ? `<span class="fn-sub">${esc(f.sub)}</span>` : ''}`;
   }
@@ -748,11 +775,11 @@ export class Home {
   handle(a, info) {
     if (a === 'home') {
       sfx('back');
-      if (ps5() && this.tab !== 'games') { this.tab = 'games'; this.items = []; this.refresh(); }
+      if (ps5() && this.tab !== 'all') { this.tab = 'all'; this.items = []; this.refresh(); }
       this.setArea('row'); this.select(this.homeIndex(), false); return;
     }
-    // PS5: L1 / R1 switch between the Games and Media tabs
-    if (ps5() && (a === 'l1' || a === 'r1') && this.area !== 'hub') { if (!(info && info.repeat)) this.setTab(a === 'l1' ? 'games' : 'media'); return; }
+    // PS5: L1 / R1 move between the All, Favorites and Media tabs
+    if (ps5() && (a === 'l1' || a === 'r1') && this.area !== 'hub') { if (!(info && info.repeat)) this.setTab(TABS5[TABS5.indexOf(this.tab) + (a === 'l1' ? -1 : 1)]); return; }
     if (this.area === 'row') return this.handleRow(a, info);
     if (this.area === 'fn') return this.handleFn(a);
     if (this.area === 'hub') return this.handleHub(a);
