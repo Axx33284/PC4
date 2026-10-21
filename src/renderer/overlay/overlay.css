@@ -1,0 +1,2 @@
+/* The Quick Menu over a running game: a transparent window, only the menu (and its keyboard / song list) shows */
+html.overlay, html.overlay body { background: transparent !important; }

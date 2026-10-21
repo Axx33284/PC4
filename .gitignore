@@ -1,0 +1,17 @@
+# dependencies and build output
+node_modules/
+dist/
+
+# the owner's own Sony sounds / music / fonts (never shipped or committed)
+sounds/
+music/
+fonts/
+assets/fonts/*.ttf
+assets/fonts/*.otf
+assets/fonts/*.woff
+assets/fonts/*.woff2
+
+# logs and OS clutter
+*.log
+Thumbs.db
+desktop.ini

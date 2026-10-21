@@ -1,0 +1,315 @@
+/* PC4 console mode – PS5 style (Settings > Themes > Console Style). Loaded after ps4.css; everything here is under
+   body.ui-ps5, so the PS4 look is untouched. Same units: 1rem = 1/108 of the screen height. */
+
+body.ui-ps5 {
+  --bar: #24262d;
+  --tile-bg: #1c1e25;
+  --panel: rgba(38, 40, 48, .72);
+  --panel-solid: #202229;
+  --ring: #fff;
+  --glow: rgba(255, 255, 255, .22);
+  --text-dim: rgba(255, 255, 255, .64);
+  --r: 1.4rem;               /* corner radius of tiles and cards */
+  font-weight: 400;
+}
+
+/* ---------------- background: PS5 blue, no waves; the selected game's (or story's) art fills the screen ---------------- */
+/* Like Playnite's PS5-ish theme: its background picture (assets.js wallpaper5 -> --p5-wall) under a radial shade that
+   is clear around 90% / 40% and 40% black at the edges (its MainBackgroundOverlay). Without a picture: PC4's blue. */
+body.ui-ps5 #bg {
+  background:
+    radial-gradient(ellipse 60% 60% at 90% 40%, transparent 0%, rgba(0,0,0,.25) 50%, rgba(0,0,0,.4) 100%),
+    var(--p5-wall, none) center / cover no-repeat,
+    radial-gradient(ellipse 70% 70% at 72% 40%, rgba(30, 96, 190, .55), transparent 72%),
+    radial-gradient(ellipse 60% 70% at 5% 100%, rgba(10, 40, 100, .6), transparent 70%),
+    linear-gradient(180deg, #0a2a5c, #04122c 70%, #020a1a);
+}
+body.ui-ps5 #bg canvas, body.ui-ps5 #bg .bg-dyn { display: none; }
+body.ui-ps5 #bg .bg-game { transition: opacity .6s ease; }
+body.ui-ps5 #bg .bg-game::after {
+  background:
+    radial-gradient(ellipse 60% 60% at 90% 40%, transparent 0%, rgba(0,0,0,.25) 50%, rgba(0,0,0,.4) 100%),
+    linear-gradient(90deg, rgba(0,0,0,.6) 0%, rgba(0,0,0,.3) 40%, rgba(0,0,0,0) 66%),
+    linear-gradient(180deg, rgba(0,0,0,.5) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,0) 55%, rgba(0,0,0,.7) 100%);
+}
+
+/* ---------------- top bar: Games / Media on the left; Search, Settings, avatar, clock on the right ---------------- */
+.p5-tabs { display: none; }
+body.ui-ps5 .p5-tabs {
+  position: absolute; left: 8.6rem; top: 2.3rem; height: 6rem; display: flex; align-items: center; gap: 6.4rem;
+  font-size: 3.3rem; font-weight: 500; z-index: 4; transition: opacity .3s;
+}
+body.ui-ps5 .p5-tabs span { color: rgba(255,255,255,.6); font-weight: 400; cursor: pointer; }
+body.ui-ps5 .p5-tabs span.on { color: #fff; font-weight: 500; }
+
+body.ui-ps5 #statusbar { left: auto; right: 8.6rem; top: 2.3rem; height: 6rem; padding: 0; font-size: 2.6rem; }
+body.ui-ps5 #statusbar .sb-right { gap: 3rem; flex: none; }
+body.ui-ps5 #statusbar .clock { font-size: 3.4rem; font-weight: 300; letter-spacing: .02em; }
+body.ui-ps5 #statusbar.scrolled { transform: translateY(-20rem); }
+
+/* the function area becomes three round icons left of the clock, always on screen */
+body.ui-ps5 .fn-row {
+  left: auto; right: calc(var(--sbw, 12rem) + 8.6rem + 6rem); top: 2.3rem; justify-content: flex-end; gap: 5rem;
+  opacity: 1; transform: none; pointer-events: auto; z-index: 4;
+}
+body.ui-ps5 .fn-item { width: 6rem; height: 6rem; border-radius: 50%; background: transparent; }
+body.ui-ps5 .fn-item .ico { width: 3.8rem; height: 3.8rem; stroke-width: 2.2; }
+body.ui-ps5 .fn-item.sel { transform: none; background: rgba(255,255,255,.18); }
+body.ui-ps5 .fn-item.focus-ring { box-shadow: 0 0 0 .3rem #fff; }
+body.ui-ps5 .fn-item.focus-ring::before { border-radius: 50%; }
+body.ui-ps5 #home:not(.area-fn) .fn-item.sel { background: transparent; box-shadow: none; }
+body.ui-ps5 #home:not(.area-fn) .fn-item.sel::before { display: none; }
+body.ui-ps5 .p5-avatar { position: relative; width: 5rem; height: 5rem; border-radius: 50%; display: grid; place-items: center; font-size: 2.4rem;
+  background: linear-gradient(135deg, #5d6273, #2a2d37); }
+body.ui-ps5 .p5-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+body.ui-ps5 .p5-avatar i { position: absolute; right: -.1rem; bottom: -.1rem; width: 1.4rem; height: 1.4rem; border-radius: 50%; background: #2fd16a; box-shadow: 0 0 0 .3rem #0b2350; }
+body.ui-ps5 .fn-label { left: auto; right: calc(var(--sbw, 12rem) + 8.6rem + 6rem); top: 9.4rem; text-align: right; font-size: 2.2rem; z-index: 4; }
+body.ui-ps5 .fn-sub { display: none; }
+body.ui-ps5 #home.area-fn .tile-row { transform: none; opacity: .6; }
+body.ui-ps5 #home.area-fn .tile-title { opacity: 0; }
+body.ui-ps5 #home.area-fn .hub { opacity: .6; }
+
+/* ---------------- the row: small icons, the focused one big ---------------- */
+body.ui-ps5 .tile-row { height: 32rem; }
+body.ui-ps5 .tile-row .tile {
+  top: 12rem; width: 11.4rem; height: 11.4rem; border-radius: 1.4rem;
+  transition: transform .3s var(--ease), width .3s var(--ease), height .3s var(--ease), top .3s var(--ease), opacity .3s ease;
+}
+body.ui-ps5 .tile-row .tile .art { border-radius: 1.4rem; }
+body.ui-ps5 .tile-row .tile .bar, body.ui-ps5 .tile-row .tile.sel::after { display: none; }
+body.ui-ps5 .tile-row .tile.sel {
+  top: 11.4rem; width: 19rem; height: 19rem; border-radius: 2.2rem; background: rgba(28, 34, 46, .55);
+  box-shadow: inset 0 0 0 .25rem rgba(226, 232, 242, .92), 0 0 2.4rem rgba(255,255,255,.18);
+}
+body.ui-ps5 .tile-row .tile.sel .art { inset: .7rem; border-radius: 1.6rem; }
+body.ui-ps5 .tile-row .tile.gone { opacity: 0; }
+body.ui-ps5 .tile-row .tile .run-dot { right: .7rem; top: .7rem; width: 1.2rem; height: 1.2rem; }
+/* first appearance (PS5-ish): the row grows from a quarter of its size after half a second, the tiles fade in one after
+   the other */
+body.ui-ps5 .tile-row.intro { animation: p5RowIn .5s .35s cubic-bezier(.37, 0, .63, 1) both; transform-origin: 10% 40%; }
+body.ui-ps5 .tile-row.intro .tile { animation-name: tileIn5; }
+@keyframes p5RowIn { from { scale: .25; opacity: 0; } }
+@keyframes tileIn5 { from { opacity: 0; translate: 6rem 0; } }
+/* the focused icon: a quick sine-eased grow (PS5-ish: .625 -> 1 in 0.1 s) and a soft white shimmer every 9 s */
+body.ui-ps5 .tile-row .tile.sel { transition-duration: .14s; transition-timing-function: cubic-bezier(.37, 0, .63, 1); }
+body.ui-ps5 .tile-row .tile.sel .art::after {
+  content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: #fff; opacity: 0;
+  animation: p5Shimmer 9s 1s infinite;
+}
+@keyframes p5Shimmer { 0% { opacity: 0; animation-timing-function: cubic-bezier(.7, 0, .3, 1); } 16.6% { opacity: .2; animation-timing-function: cubic-bezier(.7, 0, .3, 1); } 33.3%, 100% { opacity: 0; } }
+body.perf-light.ui-ps5 .tile-row .tile.sel .art::after { display: none; }
+/* system tiles: dark rounded squares with a white glyph (the Store keeps its blue) */
+body.ui-ps5 .art-sys, body.ui-ps5 .art-sys.app-media, body.ui-ps5 .art-sys.app-gallery { background: rgba(20, 30, 46, .82); }
+body.ui-ps5 .tile-row .tile.sel .art-sys { background: transparent; }
+body.ui-ps5 .art-sys .ico { width: 46%; height: 46%; stroke-width: 1.6; }
+body.ui-ps5 .art-sys.store { background: linear-gradient(160deg, #1f60e0, #0b2f96); }
+body.ui-ps5 .art-sys.store .ico { color: #fff; }
+body.ui-ps5 .art-sys .sys-label { display: none; }
+body.ui-ps5 .art-sys.labelled .ico { width: 46%; height: 46%; transform: none; }
+body.ui-ps5 .art-sys.art-yt { background: linear-gradient(160deg, #ff3b30, #c4120a 70%); }
+body.ui-ps5 .art-sys.art-yt .ico { transform: none; }
+body.ui-ps5 .art-ph { background: linear-gradient(145deg, #3a3e4c, #1a1c24); }
+body.ui-ps5 .art-folder { background: #20232b; }
+
+/* the name under the small icons, next to the focused one */
+body.ui-ps5 .tile-title, body.ui-ps5 .tile-title.small {
+  top: 25rem; font-size: 2.9rem; font-weight: 400; max-width: 100rem; line-height: 1.2; text-shadow: 0 .2rem .8rem rgba(0,0,0,.5);
+}
+body.ui-ps5 #home.area-hub .tile-row, body.ui-ps5 #home.area-hub .tile-title { opacity: 1; }
+
+/* ---------------- the hub: words (or the game's logo + Play) above a row of cards ---------------- */
+body.ui-ps5 .hub { top: 40rem; }
+body.ui-ps5 .p5-hero { padding-left: 16.5rem; padding-right: 60rem; height: 41rem; display: flex; flex-direction: column; justify-content: flex-end; }
+body.ui-ps5 .p5-kicker { font-size: 2.3rem; color: rgba(255,255,255,.82); margin-bottom: 2.6rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.ui-ps5 .p5-title { font-size: 5.6rem; font-weight: 300; line-height: 1.15; text-shadow: 0 .2rem 1.2rem rgba(0,0,0,.4);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+body.ui-ps5 .p5-desc { margin-top: 2.2rem; font-size: 2.9rem; font-weight: 300; line-height: 1.55; color: rgba(255,255,255,.78);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+body.ui-ps5 .p5-logo {
+  max-width: 62rem; max-height: 20rem; object-fit: contain; object-position: left bottom; align-self: flex-start;
+  filter: drop-shadow(0 .4rem 1.6rem rgba(0,0,0,.55));
+}
+body.ui-ps5 .p5-name { font-size: 6.4rem; font-weight: 400; line-height: 1.1; max-width: 100rem; text-shadow: 0 .3rem 1.4rem rgba(0,0,0,.6); }
+body.ui-ps5 .p5-actions { display: flex; align-items: center; gap: 1.6rem; margin-top: 4rem; }
+body.ui-ps5 .p5-play {
+  position: relative; width: 30rem; height: 6.6rem; border-radius: 1.2rem; display: grid; place-items: center;
+  background: rgba(255,255,255,.92); color: #111; font-size: 2.8rem; font-weight: 600; transition: transform .2s var(--ease), background .2s;
+}
+body.ui-ps5 .p5-more {
+  position: relative; width: 6.6rem; height: 6.6rem; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(40, 42, 50, .75); transition: transform .2s var(--ease), background .2s;
+}
+body.ui-ps5 .p5-more .ico { width: 3.6rem; height: 3.6rem; }
+body.ui-ps5 .p5-play.sel { background: #fff; transform: scale(1.04); }
+body.ui-ps5 .p5-more.sel { background: rgba(255,255,255,.28); transform: scale(1.06); }
+body.ui-ps5 .p5-play.focus-ring { box-shadow: 0 0 0 .3rem #000, 0 0 0 .6rem #fff, 0 0 3rem rgba(255,255,255,.35); }
+body.ui-ps5 .p5-more.focus-ring { box-shadow: 0 0 0 .3rem #fff, 0 0 2.4rem rgba(255,255,255,.3); }
+body.ui-ps5 .p5-play.focus-ring::before, body.ui-ps5 .p5-more.focus-ring::before { display: none; }
+body.ui-ps5 .p5-sub { margin-left: 2rem; font-size: 2.2rem; color: rgba(255,255,255,.78); text-shadow: 0 .2rem .6rem rgba(0,0,0,.6); }
+
+/* cards along the bottom (the screen scrolls up to them) */
+body.ui-ps5 .hub-cards, body.ui-ps5 .hub-cards.p5-cards { padding-left: 16.5rem; gap: 3.5rem; }
+body.ui-ps5 .p5-cards { margin-top: 5.5rem; }
+body.ui-ps5 .card {
+  border-radius: 1.2rem; overflow: hidden; background: var(--panel);
+  backdrop-filter: blur(2.4rem) saturate(1.2);
+}
+body.ui-ps5 .card h3 { font-weight: 500; }
+body.ui-ps5 .card.focus-ring, body.ui-ps5 .wn-entry.focus-ring { box-shadow: 0 0 0 .3rem #fff, 0 0 2.6rem rgba(255,255,255,.22); }
+body.ui-ps5 .card.focus-ring::before, body.ui-ps5 .wn-entry.focus-ring::before { display: none; }
+body.ui-ps5 .card.sel { transform: scale(1.03); }
+/* Explore: 16:9 pictures with the story's title over the bottom */
+body.ui-ps5 .card.p5-news { width: 39.5rem; height: 22.2rem; background: rgba(12, 30, 60, .8); }
+body.ui-ps5 .p5-news img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+body.ui-ps5 .p5-news .p5-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 4rem 1.6rem 1.4rem; font-size: 2.2rem;
+  background: linear-gradient(transparent, rgba(0,0,0,.75)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.ui-ps5 .hub-cards.vertical { padding-left: 16.5rem; }
+body.ui-ps5 .wn { padding-left: 16.5rem; }
+body.ui-ps5 .wn-entry { border-radius: 1.2rem; }
+body.ui-ps5 .fold-row .tile { border-radius: 1.4rem; }
+body.ui-ps5 .fold-row .tile .art { border-radius: 1.4rem; }
+body.ui-ps5 .fold-row .tile.sel { box-shadow: 0 0 0 .3rem #fff; }
+body.ui-ps5 .fold-row .tile.sel::after { display: none; }
+
+/* ---------------- everything else: rounded, dark glass, white focus ---------------- */
+body.ui-ps5 .focus-ring { box-shadow: 0 0 0 .3rem #fff; }
+body.ui-ps5 .focus-ring::before { animation: none; opacity: .6; }
+body.ui-ps5 .opt-item.focus-ring, body.ui-ps5 .lib-cat.focus-ring { box-shadow: inset 0 0 0 .25rem #fff; }
+body.ui-ps5 .opt-item.focus-ring::before, body.ui-ps5 .lib-cat.focus-ring::before { display: none; }
+
+/* options: a floating rounded sheet on the right */
+body.ui-ps5 .opt-panel {
+  top: 3rem; bottom: 3rem; right: 3rem; width: 54rem; border-radius: 2.4rem; padding: 4.4rem 1.6rem 3rem;
+  background: rgba(28, 30, 38, .94); transform: translateX(120%);
+}
+body.ui-ps5 .layer.open .opt-panel { transform: none; }
+body.ui-ps5 .opt-title { padding: 0 3.4rem 2rem; }
+body.ui-ps5 .opt-item { border-radius: 1.2rem; padding: 0 3.4rem; height: 7rem; }
+body.ui-ps5 .opt-item.sel { background: rgba(255,255,255,.16); }
+
+body.ui-ps5 .dlg { border-radius: 2.4rem; background: rgba(30, 32, 40, .98); }
+body.ui-ps5 .dlg-shade { background: rgba(0, 0, 0, .55); }
+body.ui-ps5 .dlg .btn { border-radius: 1.2rem; }
+body.ui-ps5 .dlg .btn.sel { background: #fff; color: #111; font-weight: 600; }
+
+/* notifications come in at the top right */
+body.ui-ps5 .toasts { left: auto; right: 4.6rem; }
+body.ui-ps5 .toast { border-radius: 1.8rem; background: rgba(30, 32, 40, .94); transform: translateX(4rem); }
+body.ui-ps5 .toast.show { transform: none; }
+body.ui-ps5 .toast .t-ico { border-radius: 1.2rem; background: #2c2f3a; }
+
+body.ui-ps5 .panel-shade { background: rgba(6, 8, 14, .94); }
+body.ui-ps5 .avatar { border-radius: 50%; background: linear-gradient(135deg, #5d6273, #2a2d37); }
+body.ui-ps5 .prof-stats > div, body.ui-ps5 .pick-item, body.ui-ps5 .set-row.sel, body.ui-ps5 .erow.sel, body.ui-ps5 .ebtn,
+body.ui-ps5 .lib-cat.sel, body.ui-ps5 .lib-sort, body.ui-ps5 .st-card, body.ui-ps5 .md-item, body.ui-ps5 .md-src, body.ui-ps5 .qm-row.sel { border-radius: 1.2rem; }
+body.ui-ps5 .set-row { border-bottom-color: rgba(255,255,255,.08); }
+body.ui-ps5 .check { border-radius: .6rem; }
+body.ui-ps5 .check.on { color: #111; }
+body.ui-ps5 .ebtn.primary { background: rgba(255,255,255,.85); color: #111; }
+body.ui-ps5 .ebtn.primary.sel { background: #fff; }
+
+/* library */
+body.ui-ps5 .lib-side { background: rgba(10, 12, 18, .55); }
+body.ui-ps5 .lib-item .sq, body.ui-ps5 .lib-item .sq .art { border-radius: var(--r); }
+body.ui-ps5 .lib-item .sq { overflow: hidden; }
+body.ui-ps5 .lib-item.sel .sq { box-shadow: 0 0 0 .32rem #fff; transform: scale(1.05); }
+body.ui-ps5 .lib-search-box { border-radius: 1.2rem; }
+
+/* on-screen keyboard: dark grey keys */
+body.ui-ps5 .osk { background: rgba(24, 26, 32, .97); border-radius: 2.4rem 2.4rem 0 0; }
+body.ui-ps5 .osk-field { border-radius: 1.2rem; background: rgba(255,255,255,.06); }
+body.ui-ps5 .osk-key { background: rgba(255,255,255,.12); border-radius: 1rem; }
+body.ui-ps5 .osk-key.k-blank { background: rgba(255,255,255,.05); }
+body.ui-ps5 .osk-key.k-done { background: #fff; color: #111; }
+body.ui-ps5 .osk-suggest { background: rgba(255,255,255,.06); border-radius: 1rem; }
+
+/* ---------------- Control Center (PS button): cards above a row of round icons, along the bottom ----------------
+   quickmenu.js builds it when the style is PS5 (also in the overlay over a game, which loads this file too) */
+body.ui-ps5 .qm { background: rgba(20, 22, 28, .97); border-radius: 0 2.4rem 2.4rem 0; }
+body.ui-ps5 .qm-shade { background: linear-gradient(180deg, rgba(0,0,0,0) 30%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.6)); }
+body.ui-ps5 .cc {
+  position: absolute; left: 0; right: 0; bottom: 0; padding: 4.6rem 8.6rem 3.2rem;
+  background: linear-gradient(180deg, rgba(14, 16, 22, .82), rgba(8, 9, 13, .94));
+  backdrop-filter: blur(3rem) saturate(1.2); box-shadow: 0 -1rem 5rem rgba(0,0,0,.45);
+  transform: translateY(100%); transition: transform .34s var(--ease);
+}
+body.ui-ps5 .qm-layer.in .cc { transform: none; }
+body.ui-ps5 .cc-top { position: absolute; right: 8.6rem; top: 3.2rem; display: flex; align-items: center; gap: 3rem; font-size: 2.6rem; }
+body.ui-ps5 .cc-top .qm-clock { font-size: 3rem; font-weight: 300; color: #fff; }
+body.ui-ps5 .cc-bat { display: flex; align-items: center; gap: 1rem; color: rgba(255,255,255,.8); font-size: 2.2rem; }
+body.ui-ps5 .cc-bat .ico { width: 3.4rem; height: 3.4rem; }
+
+/* the cards: the game you're playing, music, captures */
+body.ui-ps5 .cc-cards { display: flex; gap: 2.6rem; margin-top: 5rem; height: 21rem; }
+body.ui-ps5 .cc-card {
+  position: relative; flex: none; width: 37rem; height: 21rem; border-radius: 1.6rem; overflow: hidden;
+  background: rgba(255,255,255,.08); transition: transform .2s var(--ease), box-shadow .2s;
+}
+body.ui-ps5 .cc-card.cc-k-game { width: 50rem; }
+body.ui-ps5 .cc-card.sel { transform: scale(1.04); }
+body.ui-ps5 .cc-card.focus-ring { box-shadow: 0 0 0 .3rem #fff, 0 0 3rem rgba(255,255,255,.25); }
+body.ui-ps5 .cc-card.sel:not(.focus-ring) { box-shadow: 0 0 0 .25rem rgba(255,255,255,.45); }
+body.ui-ps5 .cc-card.focus-ring::before { display: none; }
+body.ui-ps5 .cc-card small { display: block; font-size: 1.9rem; color: rgba(255,255,255,.72); margin-bottom: .4rem; }
+body.ui-ps5 .cc-card b { display: block; font-weight: 500; font-size: 2.6rem; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.ui-ps5 .cc-art { position: absolute; inset: 0; }
+body.ui-ps5 .cc-art img { width: 100%; height: 100%; object-fit: cover; }
+body.ui-ps5 .cc-cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 6rem 2.2rem 1.8rem; background: linear-gradient(transparent, rgba(0,0,0,.8)); }
+body.ui-ps5 .cc-plain { position: absolute; inset: 0; padding: 2.4rem; display: flex; flex-direction: column; justify-content: space-between; }
+body.ui-ps5 .cc-plain > .ico { width: 5rem; height: 5rem; }
+body.ui-ps5 .cc-plain b { white-space: normal; }
+body.ui-ps5 .cc-music { position: absolute; inset: 0; padding: 2.4rem; display: flex; align-items: center; gap: 2.2rem; }
+body.ui-ps5 .cc-music .qm-cover { width: 14rem; height: 14rem; border-radius: 1rem; }
+body.ui-ps5 .cc-music .qm-song b { font-size: 2.5rem; }
+body.ui-ps5 .cc-play { flex: none; width: 5.6rem; height: 5.6rem; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.14); }
+body.ui-ps5 .cc-play .ico { width: 3rem; height: 3rem; }
+body.ui-ps5 .cc-card > .qm-prog { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; height: .5rem; }
+
+/* the round menu icons and the focused one's name under it */
+body.ui-ps5 .cc-icons { display: flex; gap: 2.4rem; margin-top: 4.4rem; height: 8.4rem; align-items: center; }
+body.ui-ps5 .cc-ico {
+  position: relative; flex: none; width: 8.4rem; height: 8.4rem; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(255,255,255,.1); color: #fff; transition: transform .2s var(--ease), background .2s, color .2s;
+}
+body.ui-ps5 .cc-ico .ico { width: 4.2rem; height: 4.2rem; }
+body.ui-ps5 .cc-ico.sel { background: #fff; color: #111; transform: scale(1.1); }
+body.ui-ps5 .cc-ico.focus-ring { box-shadow: 0 0 2.6rem rgba(255,255,255,.35); }
+body.ui-ps5 .cc-ico.focus-ring::before { display: none; }
+body.ui-ps5 .cc-ico.sel:not(.focus-ring) { background: rgba(255,255,255,.7); }
+body.ui-ps5 .cc-dot { position: absolute; right: .5rem; top: .5rem; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: #2fd16a; box-shadow: 0 0 0 .3rem #121418; }
+body.ui-ps5 .cc-icons { margin-bottom: 6.4rem; }
+body.ui-ps5 .cc-label { position: absolute; transform: translateX(-50%); white-space: nowrap; font-size: 2.4rem; }
+body.ui-ps5 .cc-label span { margin-left: 1.2rem; color: rgba(255,255,255,.65); }
+body.ui-ps5 .cc .qm-hints { position: absolute; right: 8.6rem; bottom: 3.2rem; padding: 0; }
+
+/* the small card that opens above the focused item (✕) with its rows */
+body.ui-ps5 .cc-pop {
+  position: absolute; width: 62rem; max-height: 60rem; display: none; flex-direction: column; padding: 2.4rem 1.6rem 1.6rem;
+  border-radius: 2.4rem; background: rgba(32, 34, 42, .97); box-shadow: 0 1.6rem 6rem rgba(0,0,0,.6);
+}
+body.ui-ps5 .cc-pop.open { display: flex; animation: ccPop .22s var(--ease); }
+@keyframes ccPop { from { opacity: 0; translate: 0 2rem; } }
+body.ui-ps5 .cc-pop-head { font-size: 2.2rem; color: rgba(255,255,255,.7); padding: 0 1.6rem 1.4rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+body.ui-ps5 .cc-pop-list { min-height: 0; overflow: hidden; display: flex; flex-direction: column; gap: .4rem; }
+body.ui-ps5 .cc-pop .qm-row { min-height: 6.6rem; font-size: 2.5rem; }
+body.ui-ps5 .cc-pop .qm-row.sel { background: rgba(255,255,255,.16); }
+body.ui-ps5 .cc-pop .qm-row.focus-ring { box-shadow: inset 0 0 0 .25rem #fff; }
+body.ui-ps5 .cc-pop .qm-row.focus-ring::before { display: none; }
+body.ui-ps5 .cc-pop .qm-music { min-height: 12rem; }
+body.ui-ps5 .cc-pop .qm-cover { border-radius: .8rem; }
+body.ui-ps5 .cc-pop .qm-choice { max-width: 26rem; }
+body.ui-ps5.perf-light .cc { backdrop-filter: none; background: rgba(12, 13, 18, .97); }
+
+/* apps */
+body.ui-ps5 .store-app { background: radial-gradient(ellipse at 20% 0%, #1d3f9e, #0a1430 60%, #05070d); }
+body.ui-ps5 .st-img, body.ui-ps5 .md-th { border-radius: 1.2rem 1.2rem 0 0; }
+
+/* boot and the user screen: white light instead of blue waves, round avatar */
+body.ui-ps5 .boot-waves { display: none; }
+body.ui-ps5 .boot-logo { filter: drop-shadow(0 0 .6rem rgba(255,255,255,.85)) drop-shadow(0 0 2.6rem rgba(200,215,255,.45)); }
+body.ui-ps5 .login .user { background: transparent; padding: 0; }
+body.ui-ps5 .login .user .avatar { border-radius: 50%; box-shadow: 0 0 0 .4rem #fff, 0 0 4rem rgba(255,255,255,.3); }
+body.ui-ps5 .login .user .nm { margin-top: 2.4rem; }
+
+/* Light performance mode: no glass */
+body.ui-ps5.perf-light .card { backdrop-filter: none; background: rgba(34, 36, 44, .92); }

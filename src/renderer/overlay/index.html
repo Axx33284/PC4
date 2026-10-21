@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en" class="overlay">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file: 'sha256-ko2FDFW5AThO3zDC4wsx9IvEZDc61npYiw0tyBU+04s='; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob: https: http:; media-src 'self' file: data: blob: https: http:; font-src 'self' file: data:; connect-src 'self' file: data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <title>PC4 Quick Menu</title>
+  <link rel="stylesheet" href="../../../node_modules/@fontsource-variable/source-sans-3/index.css">
+  <link rel="stylesheet" href="../fullscreen/ps4.css">
+  <link rel="stylesheet" href="../fullscreen/ps5.css">
+  <link rel="stylesheet" href="overlay.css">
+  <!-- the Quick Menu is the console mode's own; only its music player is swapped for a remote control
+       of the one playing in PC4's main window -->
+  <script type="importmap">{ "imports": { "../fullscreen/player.js": "./player-proxy.js" } }</script>
+</head>
+<body class="hide-cursor">
+  <div id="overlays"></div>
+  <script type="module" src="overlay.js"></script>
+</body>
+</html>

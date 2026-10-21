@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' file:; style-src 'self' file: 'unsafe-inline'; img-src 'self' file: data: blob: https: http:; media-src 'self' file: data: blob: https: http:; font-src 'self' file: data:; connect-src 'self' file: data: blob:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <title>PC4</title>
+  <link rel="stylesheet" href="desktop.css">
+  <link rel="stylesheet" href="../common/padtester.css">
+</head>
+<body>
+  <!-- Laid out like Playnite's desktop app (theme "Standard X"): sidebar on the left, top panel, the library views,
+       explorer and filter panels at the sides, zoom at the bottom. -->
+  <nav class="sidebar" id="sidebar"></nav>
+  <header class="top" id="top">
+    <div class="search"><span class="s-ico"></span><input id="search" spellcheck="false" placeholder=""></div>
+    <div class="tp-items" id="tp-items"></div>
+    <div class="tp-progress" id="tp-progress"></div>
+    <div class="tp-right" id="tp-right"></div>
+  </header>
+  <div class="body" id="body">
+    <aside class="explorer hidden" id="explorer"></aside>
+    <main class="main" id="main"></main>
+    <aside class="filterpanel hidden" id="filterpanel"></aside>
+    <aside class="editor hidden" id="editor"></aside>
+  </div>
+  <div id="menus"></div>
+  <div id="modals"></div>
+  <div class="toast-area" id="toasts"></div>
+  <script type="module" src="desktop.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{
+  "name": "pc4",
+  "productName": "PC4",
+  "version": "1.1.0",
+  "description": "PC4 - a game library launcher with a PS4-style console mode",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "fullscreen": "electron . --fullscreen",
+    "build-helper": "node tools/build-helper.js",
+    "predist": "node tools/build-helper.js",
+    "dist": "electron-builder --win",
+    "pack": "node tools/build-helper.js && electron-builder --win --dir"
+  },
+  "author": "Ahmad",
+  "license": "MIT",
+  "build": {
+    "appId": "com.ahmad.pc4",
+    "productName": "PC4",
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "assets/**/*",
+      "node_modules/@fontsource*/**/*",
+      "!**/*.md"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "extraResources": [
+      {
+        "from": "build/helper",
+        "to": "helper",
+        "filter": [
+          "pc4pad.exe",
+          "pc4wake.exe",
+          "pc4pad.version"
+        ]
+      }
+    ],
+    "asar": true,
+    "copyright": "Copyright © 2026 Ahmad",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build-resources"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PC4",
+      "artifactName": "PC4-Setup-${version}.${ext}"
+    },
+    "electronFuses": {
+      "runAsNode": false,
+      "enableCookieEncryption": true,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    },
+    "electronLanguages": [
+      "en-US"
+    ],
+    "compression": "maximum"
+  },
+  "devDependencies": {
+    "electron": "^44.4.5",
+    "electron-builder": "^26.15.3"
+  },
+  "dependencies": {
+    "@fontsource-variable/source-sans-3": "^5.3.0"
+  }
+}
