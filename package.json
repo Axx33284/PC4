@@ -1,7 +1,7 @@
 {
   "name": "pc4",
   "productName": "PC4",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "PC4 - a game library launcher with a PS4-style console mode",
   "main": "main.js",
   "scripts": {
