@@ -210,6 +210,8 @@ api.on('youtube', (open, reason) => { if (open) onYouTubeShown(); else onYouTube
 api.on('quickmenu', () => { if (!quickMenuOpen()) openQuickMenu({ fromGame: ctx.state.running.length > 0 }); });
 api.on('go-home', () => { if (topLayer() === library || topLayer() === settings) nav.closeScreen(topLayer()); if (topLayer() === home) home.handle('home'); });
 api.on('pad-home', () => dispatch('home', { source: 'pad' }));
+// a new version finished downloading in the background: it installs when PC4 closes (or now, in Settings › System)
+api.on('update', v => toast({ title: `PC4 ${v} is ready`, body: 'It installs when you close PC4. Settings › System to restart now', ico: 'download' }));
 api.on('capture', m => {
   if (m.event === 'saved') toast({ title: m.title, body: m.body, ico: m.kind === 'video' ? 'video' : 'camera', sound: false });
   else if (m.event === 'recording') toast({ id: 'rec', title: m.title, body: m.body, ico: 'record', sound: false });

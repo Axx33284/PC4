@@ -19,6 +19,7 @@ const perf = require('./src/main/perf');
 const { Capture } = require('./src/main/capture');
 const { shop } = require('./src/main/shop');
 const Warp = require('./src/main/warp');
+const { Updater } = require('./src/main/updater');
 
 app.setAppUserModelId('com.ahmad.pc4');
 
@@ -83,6 +84,7 @@ let assets = null;
 let news = null;
 let industry = null;
 let emulator = null;
+let updater = null;
 let hw = null; // this PC's hardware, for the Automatic performance mode
 let capture = null;
 let ytdlp = null;
@@ -129,6 +131,7 @@ function state() {
     news: store.settings.showNews ? news.items : [],
     industryVersion: industry.version, // the stories themselves are fetched with industry:get (they're big)
     emulator: emulator.state,
+    update: updater ? updater.state : null,
     warp: warp ? warp.state : null,
     perf: perfState(),
     recording: capture ? capture.recording : false,
@@ -1099,6 +1102,8 @@ function registerIpc() {
   });
   handle('app:openExternal', url => /^(https?:\/\/|steam:\/\/store\/\d+$|com\.epicgames\.launcher:\/\/store\/p\/[\w-]+$)/.test(url) && shell.openExternal(url));
   handle('app:version', () => app.getVersion());
+  handle('app:checkUpdate', () => (updater ? updater.check() : null));
+  handle('app:installUpdate', () => { if (updater) updater.install(); });
   handle('sound:read', (name, style) => assets.readSound(name, style));
   // WebHID needs a user gesture to pick a device; this runs the request as one and auto-picks the Sony pad
   handle('hid:request', () => win.webContents.executeJavaScript(
@@ -1128,6 +1133,11 @@ app.whenReady().then(async () => {
   emulator = new Emulator(path.join(app.getPath('userData'), 'bin'), path.join(__dirname, 'src', 'helper', 'Pc4Pad.cs'),
     app.isPackaged ? path.join(process.resourcesPath, 'helper') : null);
   emulator.on('change', pushState);
+  // updates from GitHub Releases: checked a minute after start, downloaded in the background, installed on quit
+  updater = new Updater({ app, log, busy: () => inGame() });
+  updater.on('change', pushState);
+  updater.on('ready', v => send('update', v));
+  if (!TEST) updater.start();
   emulator.on('button', onPadButton);
   emulator.on('nav', b => { if (overlayShown) overlaySend('overlay-nav', b); });
   initCaptures();

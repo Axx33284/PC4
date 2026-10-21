@@ -73,7 +73,8 @@ class Assets {
   // read-only archive then); without it, the folders next to the app (while developing)
   constructor(appDir, settings, userDirs = null) {
     this.settings = settings; // () => current settings
-    this.dirs = userDirs ? { ...userDirs, rootSounds: null, rootMusic: null, rootFonts: null } : {
+    // installed: the player's own folders first, then the sound pack that ships with it (resources/sounds, next to app.asar)
+    this.dirs = userDirs ? { ...userDirs, rootSounds: path.join(path.dirname(appDir), 'sounds'), rootMusic: path.join(path.dirname(appDir), 'music'), rootFonts: null } : {
       sounds: path.join(appDir, 'assets', 'sounds'),
       music: path.join(appDir, 'assets', 'music'),
       fonts: path.join(appDir, 'assets', 'fonts'),

@@ -54,6 +54,8 @@ contextBridge.exposeInMainWorld('pc4', {
   power: action => invoke('app:power', action),
   openExternal: url => invoke('app:openExternal', url),
   version: () => invoke('app:version'),
+  checkUpdate: () => invoke('app:checkUpdate'),
+  installUpdate: () => invoke('app:installUpdate'),
   pathForFile: file => webUtils.getPathForFile(file),
   readSound: (name, style) => invoke('sound:read', name, style),
   openAssetFolder: which => invoke('app:openAssetFolder', which),
@@ -96,7 +98,7 @@ contextBridge.exposeInMainWorld('pc4', {
 
   on(channel, cb) {
     const allowed = ['state', 'task', 'game-started', 'game-stopped', 'game-failed', 'fullscreen-changed', 'youtube', 'quickmenu', 'go-home', 'pad-home', 'capture',
-      'overlay-open', 'overlay-toggle', 'overlay-close', 'overlay-shown', 'overlay-nav', 'overlay-hint', 'qm-action', 'player-cmd', 'player-state', 'warp'];
+      'overlay-open', 'overlay-toggle', 'overlay-close', 'overlay-shown', 'overlay-nav', 'overlay-hint', 'qm-action', 'player-cmd', 'player-state', 'warp', 'update'];
     if (!allowed.includes(channel)) return () => {};
     const fn = (_e, ...args) => cb(...args);
     ipcRenderer.on(channel, fn);

@@ -1,7 +1,7 @@
 {
   "name": "pc4",
   "productName": "PC4",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "PC4 - a game library launcher with a PS4-style console mode",
   "main": "main.js",
   "scripts": {
@@ -38,6 +38,14 @@
           "pc4wake.exe",
           "pc4pad.version"
         ]
+      },
+      {
+        "from": "sounds",
+        "to": "sounds",
+        "filter": [
+          "**/*",
+          "!**/*.md"
+        ]
       }
     ],
     "asar": true,
@@ -66,13 +74,22 @@
     "electronLanguages": [
       "en-US"
     ],
-    "compression": "maximum"
+    "compression": "maximum",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Axx33284",
+        "repo": "PC4",
+        "releaseType": "release"
+      }
+    ]
   },
   "devDependencies": {
     "electron": "^44.4.5",
     "electron-builder": "^26.15.3"
   },
   "dependencies": {
-    "@fontsource-variable/source-sans-3": "^5.3.0"
+    "@fontsource-variable/source-sans-3": "^5.3.0",
+    "electron-updater": "^6.8.9"
   }
 }

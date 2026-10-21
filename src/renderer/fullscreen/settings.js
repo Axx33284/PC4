@@ -310,10 +310,31 @@ const PAGES = {
         { value: 'once', label: 'Ask Once per Game' }, { value: 'ask', label: 'Ask Every Time' },
       ] },
       { icon: 'keyboard', label: 'System Font', desc: (ctx.state.fonts || []).length ? `${ctx.state.fonts.length} font file${ctx.state.fonts.length > 1 ? 's' : ''} loaded from assets/fonts` : 'Put your SST font files in assets/fonts to use them', run: () => api.openAssetFolder('fonts') },
+      { icon: 'download', label: 'System Software Update', desc: updateDesc(), run: async () => {
+        const u = ctx.state.update;
+        if (u && u.status === 'ready') { api.installUpdate(); return; }
+        if (!u || u.status === 'dev') { toast({ title: 'Updates', body: 'Only the installed PC4 updates itself', ico: 'download' }); return; }
+        toast({ title: 'Checking for updates…', ico: 'download', sound: false });
+        const r = await api.checkUpdate();
+        if (r && r.status === 'latest') toast({ title: 'PC4 is up to date', body: `Version ${await api.version()}`, ico: 'check' });
+        else if (r && r.status === 'error') toast({ title: "Couldn't check for updates", body: r.error || '', ico: 'x' });
+      } },
       { icon: 'exit', label: 'Exit PC4', run: exitPC4 },
     ],
   }),
 };
+
+// the update row's line: what the updater is doing (main.js src/main/updater.js)
+function updateDesc() {
+  const u = ctx.state.update;
+  if (!u || u.status === 'dev') return 'Updates come with the installed PC4';
+  if (u.status === 'ready') return `Version ${u.version} is ready: press to restart and install it`;
+  if (u.status === 'downloading') return `Downloading version ${u.version || ''} · ${Math.round((u.progress || 0) * 100)}%`;
+  if (u.status === 'available') return `Version ${u.version} found, downloading…`;
+  if (u.status === 'checking') return 'Checking…';
+  if (u.status === 'error') return `Couldn't check: ${u.error || 'no connection'}`;
+  return 'PC4 is up to date. Press to check now';
+}
 
 // ---------------- Settings › Keyboard ----------------
 const keyList = (id, s) => keysFor(id, s).map(keyName).join(' / ') || 'none';

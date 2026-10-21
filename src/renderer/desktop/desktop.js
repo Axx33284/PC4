@@ -492,7 +492,9 @@ function notificationsMenu(x, y) {
 // the progress of background jobs in the top panel, like Playnite's
 let progress = null;
 function renderProgress() {
-  setHtml($('#tp-progress'), 'progress', progress ? `<span class="pg-t">${esc(progress.text)}</span>${progress.value != null ? `<span class="pg-b"><i style="width:${Math.round(progress.value * 100)}%"></i></span>` : '<span class="pg-b busy"><i></i></span>'}` : '');
+  const u = S.update;
+  const p = progress || (u && u.status === 'downloading' ? { text: `Downloading PC4 ${u.version || 'update'}`, value: u.progress || 0 } : null);
+  setHtml($('#tp-progress'), 'progress', p ? `<span class="pg-t">${esc(p.text)}</span>${p.value != null ? `<span class="pg-b"><i style="width:${Math.round(p.value * 100)}%"></i></span>` : '<span class="pg-b busy"><i></i></span>'}` : '');
 }
 
 // ---------------- menus ----------------
@@ -1178,6 +1180,20 @@ function settingsDialog() {
 }
 
 
+// ---------------- updates (GitHub Releases, src/main/updater.js) ----------------
+async function checkUpdates() {
+  if (!S.update || S.update.status === 'dev') { alertBox('Updates', 'Only the installed PC4 updates itself.'); return; }
+  toast('Checking for updates…');
+  const r = await api.checkUpdate();
+  if (r && r.status === 'latest') toast('PC4 is up to date', `Version ${await api.version()}`);
+  else if (r && r.status === 'error') toast("Couldn't check for updates", r.error || '');
+  else if (r) toast(`Version ${r.version} found`, 'Downloading in the background');
+}
+api.on('update', async v => {
+  notify(`PC4 ${v} is ready`, 'It installs when you close PC4, or choose Restart to Update in the main menu');
+  if (await confirmBox('Update ready', `PC4 ${v} has been downloaded. Restart now to install it? (Otherwise it installs when you close PC4.)`, 'Restart now')) api.installUpdate();
+});
+
 // ---------------- Playnite's menus: main menu, game menu, group / sort / presets ----------------
 function mainMenu(x, y) {
   showMenu(x, y, [
@@ -1207,6 +1223,9 @@ function mainMenu(x, y) {
     '-',
     { label: 'Settings…', icon: 'gear', key: 'F4', run: settingsDialog },
     { label: 'Switch to Console Mode', icon: 'monitorPlay', key: 'F11', run: () => api.setMode('fullscreen') },
+    S.update && S.update.status === 'ready'
+      ? { label: `Restart to Update (${S.update.version})`, icon: 'download', run: () => api.installUpdate() }
+      : { label: 'Check for Updates', icon: 'download', run: checkUpdates },
     { label: 'About PC4', icon: 'info', run: async () => alertBox('PC4', `Version ${await api.version()}\nA game library for Windows in the spirit of Playnite, with a PS4 / PS5-style console mode.`) },
     '-',
     { label: 'Exit', icon: 'exit', run: () => api.window('quit') },
