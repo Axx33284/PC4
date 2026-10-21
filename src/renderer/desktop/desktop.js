@@ -211,7 +211,7 @@ function renderPadBadge() {
     html = `<button class="tp-pad ${b != null && b <= 15 ? 'low' : ''}" data-tp="pad" title="${esc(name)}${b != null ? ` — battery ${b}%${p.charging ? ', charging' : ''}` : ''} (Controller Test)">${padGlyph(kind)}
       ${b != null ? `<span class="batt ${p.charging ? 'chg' : ''}"><i style="width:${b}%"></i></span><span class="pct">${b}%</span>${p.charging ? icon('lightning') : ''}` : ''}</button>`;
   }
-  setHtml($('#tp-right'), 'pad', html);
+  setHtml($('#tp-right'), 'pad', `${html}<button class="tp-console" data-tp="console" title="Switch to Console Mode (F11)${S.settings.psWake ? ' · or press the PS button' : ''}">${icon('gameController')}<span>Console Mode</span></button>`);
 }
 setInterval(() => {
   const pads = navigator.getGamepads ? [...navigator.getGamepads()].filter(Boolean) : [];
@@ -221,7 +221,7 @@ setInterval(() => {
 
 function renderSidebar() {
   const it = (id, ico, title) => `<button class="sb-it ${ui.section === id ? 'on' : ''}" data-sb="${id}" title="${esc(title)}">${icon(ico)}</button>`;
-  setHtml($('#sidebar'), 'side', `<button class="sb-menu" data-sb="menu" title="Main menu">${icon('list')}</button>
+  setHtml($('#sidebar'), 'side', `<button class="sb-menu" data-sb="menu" title="PC4 · Main menu"><img class="app-logo" src="../../../assets/icon.png" alt="PC4"></button>
     ${it('library', 'books', 'Library')}${it('stats', 'chartBar', 'Statistics')}${it('pad', 'gameController', 'Controller Test')}
     <span class="sb-fill"></span>
     <button class="sb-it" data-sb="console" title="Switch to Console Mode (F11)">${icon('monitorPlay')}</button>
@@ -1423,6 +1423,7 @@ document.querySelector('.top').addEventListener('click', e => {
   else if (a === 'filter') { ui.filterPanel = !ui.filterPanel; ui.section = 'library'; savePrefs(); render(); }
   else if (a === 'notes') notificationsMenu(r.right - 340, r.bottom + 4);
   else if (a === 'pad') setSection('pad');
+  else if (a === 'console') api.setMode('fullscreen');
 });
 
 $('#explorer').addEventListener('change', e => { if (e.target.id === 'ex-field') { ui.explorerField = e.target.value; ui.explore = null; savePrefs(); render(); } });

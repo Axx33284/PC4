@@ -1119,6 +1119,14 @@ function registerIpc() {
 }
 
 app.whenReady().then(async () => {
+  // the taskbar / Start menu jump list: open PC4 straight into either mode
+  if (process.platform === 'win32' && !TEST) {
+    const extra = app.isPackaged ? [] : [`"${app.getAppPath()}"`];
+    app.setUserTasks([
+      { program: process.execPath, arguments: [...extra, '--fullscreen'].join(' '), iconPath: process.execPath, iconIndex: 0, title: 'Console Mode', description: 'Start PC4 in Console Mode' },
+      { program: process.execPath, arguments: [...extra, '--desktop'].join(' '), iconPath: process.execPath, iconIndex: 0, title: 'Desktop Mode', description: 'Start PC4 in Desktop Mode' },
+    ]);
+  }
   store = new Store(path.join(app.getPath('userData'), 'pc4-data'));
   store.hdd = store.settings.diskType === 'HDD';
   prepareAssetFolders();

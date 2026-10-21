@@ -52,7 +52,7 @@ const DEFAULT_SETTINGS = {
   warpAutoOff: true,          // Secure Connection: WARP goes off with the last game when PC4 turned it on
   warpRoute: 'games',         // Secure Connection carries 'games' (only blocked games' servers, fastest) or 'all' traffic
   warpTerms: false,           // the user said yes to Cloudflare WARP's terms (asked once, before PC4 first uses it)
-  psWake: false,              // press PS (or Xbox Guide) while PC4 is closed: it starts in Console Mode (pc4wake.exe at sign-in)
+  psWake: true,               // press PS (or Xbox Guide) while PC4 is closed: it starts in Console Mode (pc4wake.exe at sign-in)
   captureNotify: true,        // a quiet Windows notification when a capture is saved during a game
   captureMaxMinutes: 30,
   captureDir: null,           // default: Pictures\\PC4 Captures
@@ -85,6 +85,8 @@ function migrate(s) {
   if (s.emuMode === 'games') s.emuMode = 'always'; // emulation is simply on or off now
   if (s.gameBackgrounds === false && !s.gameWallpaper) s.gameWallpaper = 'off';
   delete s.gameBackgrounds;
+  // 1.2.1: Press PS to Start PC4 is on for everyone once (it can be turned off again in Settings)
+  if (!s.psWakeOn121) { s.psWake = true; s.psWakeOn121 = true; }
   return s;
 }
 

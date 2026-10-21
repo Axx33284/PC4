@@ -46,6 +46,7 @@ img { -webkit-user-drag: none; }
 .sidebar button:hover { background: var(--hover); }
 .sidebar .sb-menu { height: 44px; margin-bottom: 5px; }
 .sidebar .sb-menu .ico { width: 24px; height: 24px; }
+.sidebar .sb-menu .app-logo { width: 30px; height: 30px; object-fit: contain; }
 .sidebar .sb-it .ico { width: 24px; height: 24px; }
 .sidebar .sb-it.on::before { content: ''; position: absolute; left: -2px; top: 9px; bottom: 9px; width: 3px; border-radius: 2px; background: var(--text); }
 .sb-fill { flex: 1; }
@@ -80,6 +81,9 @@ img { -webkit-user-drag: none; }
 .tp-right { display: flex; align-items: center; gap: 6px; flex: none; }
 .tp-pad { display: flex; align-items: center; gap: 7px; height: 34px; padding: 0 10px; border: none; border-radius: 3px; background: none; color: var(--text); cursor: pointer; }
 .tp-pad:hover { background: var(--hover); }
+.tp-console { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 14px; border: none; border-radius: 2px; background: var(--green); color: #fff; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.tp-console:hover { background: var(--accent2); }
+.tp-console .ico { width: 20px; height: 20px; }
 .tp-pad .pad-glyph { width: 30px; height: 21px; }
 .tp-pad .batt { position: relative; width: 24px; height: 12px; border: 1.5px solid currentColor; border-radius: 2px; padding: 1px; opacity: .9; }
 .tp-pad .batt::after { content: ''; position: absolute; right: -4px; top: 3px; width: 2px; height: 4px; border-radius: 0 1px 1px 0; background: currentColor; }
